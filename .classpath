@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/CoinsAPI 1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/EffectLib-5.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/PermissionsEx-1.23.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/ProtocolLib.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/spigot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/OneDrive/Vault.jar"/>
+	<classpathentry kind="lib" path="C:/Users/MJ Video/Downloads/TimoCloud.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

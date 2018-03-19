@@ -1,0 +1,20 @@
+name: GGLobby
+version: 2.2.45
+author: MJ
+main: eu.mj.gg.lobby.main.Main
+commands:
+  setspawn:
+  setspawn1:
+  setspawn2:
+  setspawn3:
+  setspawn4:
+  setspawn5:
+  setspawn6:
+  walkspeed:
+  flyspeed:
+  kick:
+  npc:
+  test-permission:
+  chat:
+  setafkspawn:
+  build:

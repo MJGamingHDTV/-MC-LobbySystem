@@ -1,0 +1,24 @@
+ChatMessages:
+  Prefix: "&8[&dNick&8]"
+  AutoNickActivated: "&7Das Auto-Nicking wurde &aaktiviert!"
+  AutoNickDeactivated: "&7Das Auto-Nicking wurde &cdeaktiviert!"
+
+NickItem:
+  Slot: 5
+  NameOn: "&aNicking: Aktiviert"
+  NameOff: "&cNicking: Deaktiviert"
+  Type: NAME_TAG
+  Desc:
+  - "&7Rechtsklick um es zu benutzen"
+  Enchanted: true
+
+Settings:
+  AllowDrop: false
+  AllowMove: false
+
+MySQL:
+  Host: localhost
+  Port: 3306
+  Database: minecraft
+  User: root
+  Password: ""
