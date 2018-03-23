@@ -19,12 +19,18 @@ public class MainListener implements Listener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
+		new PlayerData().saveInAsyncMySQL();
 		e.setQuitMessage(null);
 		for (Player all : Bukkit.getOnlinePlayers()) {
-			Integer i = new PlayerData().getColor();
-			String c = i.toString();
-			LobbyScore.setSidebar(all, c);
+			try {
+				Integer i = new PlayerData(all).getColor();
+				String c = i.toString();
+				LobbyScore.setSidebar(all, c);
+			} catch (NullPointerException ex) {
+				LobbyScore.setSidebar(all, "0");
+			}
 		}
+
 		if (e.getPlayer().hasPermission("ranks.hadmin")) {
 			e.setQuitMessage("§8[§c-§8] §4" + e.getPlayer().getName());
 		} else if (e.getPlayer().hasPermission("ranks.admin")) {
@@ -54,6 +60,16 @@ public class MainListener implements Listener {
 
 	@EventHandler
 	public void onKick(PlayerKickEvent e) {
+		e.setLeaveMessage(null);
+		for (Player all : Bukkit.getOnlinePlayers()) {
+			try {
+				Integer i = new PlayerData(all).getColor();
+				String c = i.toString();
+				LobbyScore.setSidebar(all, c);
+			} catch (NullPointerException ex) {
+				LobbyScore.setSidebar(all, "0");
+			}
+		}
 		if (e.getPlayer().hasPermission("ranks.hadmin")) {
 			e.setLeaveMessage("§8[§c-§8] §4" + e.getPlayer().getName());
 		} else if (e.getPlayer().hasPermission("ranks.admin")) {
@@ -114,7 +130,8 @@ public class MainListener implements Listener {
 			}
 		if (cmd[0].equalsIgnoreCase("plugin") || cmd[0].equalsIgnoreCase("pl") || cmd[0].equalsIgnoreCase("plugins")) {
 			if (!p.isOp()) {
-				p.sendMessage(Main.pr + "§6Unsere Plugins haben derzeit §aUrlaub, §cschreib oder such dir deine eigenen §ePlugins!");
+				p.sendMessage(Main.pr
+						+ "§6Unsere Plugins haben derzeit §aUrlaub, §cschreib oder such dir deine eigenen §ePlugins!");
 				e.setCancelled(true);
 
 			}

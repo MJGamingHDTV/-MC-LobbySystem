@@ -79,6 +79,7 @@ public class Settings implements Listener {
 		BungeeCord.getServerInfo("127.0.0.1", 25565);
 		e.setJoinMessage("");
 		Player p = e.getPlayer();
+		new PlayerData().getAsyncMySQL();
 		PermissionUser user = PermissionsEx.getUser(p);
 		String prefix1 = user.getPrefix("world");
 		String prefix = prefix1.replace("&", "ß");
@@ -127,9 +128,13 @@ public class Settings implements Listener {
 		LobbyScore.sendTabTitle(p, "ßaWillkommen auf ß9GalaxyofGames\n ßbViel Spaﬂ beim Spielen!",
 				"ßeDu befindest dich auf:\n ß6" + servername);
 		for (Player all : Bukkit.getOnlinePlayers()) {
-			Integer i = new PlayerData(all).getColor();
-			String c = i.toString();
-			LobbyScore.setSidebar(all, c);
+			try {
+				Integer i = new PlayerData(all).getColor();
+				String c = i.toString();
+				LobbyScore.setSidebar(all, c);
+			} catch (NullPointerException ex) {
+				LobbyScore.setSidebar(all, "0");
+			}
 		}
 		ItemStack ep = new ItemStack(Material.NETHER_STAR);
 		ItemMeta epm = ep.getItemMeta();
@@ -455,7 +460,7 @@ public class Settings implements Listener {
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
-					LobbyScore.setSidebar(p,"a");
+					LobbyScore.setSidebar(p, "a");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "ßdPink") {
 					cfg.set(p.getName(), 6);
 					try {

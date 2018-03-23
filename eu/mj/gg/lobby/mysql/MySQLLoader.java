@@ -19,10 +19,14 @@ public class MySQLLoader {
 
 	public void loadConf() {
 		host = cfg.getString("host");
+		System.out.println(host);
 		port = cfg.getInt("port");
-		user = cfg.getString("user");
+		System.out.println(port);
+		user = cfg.getString("username");
+		System.out.println(user);
 		pw = cfg.getString("password");
-		db = cfg.getString("databank");
+		db = cfg.getString("database");
+		System.out.println(db);
 	}
 
 	public MySQLLoader(Plugin pl) {

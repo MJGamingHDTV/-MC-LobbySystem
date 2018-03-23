@@ -57,7 +57,7 @@ public class LobbyScore {
 
 		Score score3 = objective.getScore("§f§lOnline Spieler:");
 		score3.setScore(Integer.valueOf(7).intValue());
-		Score scoret = objective.getScore("§f" + TimoCloudAPI.getUniversalInstance().getProxy("Proxy").getOnlinePlayerCount());
+		Score scoret = objective.getScore("§f" + TimoCloudAPI.getUniversalInstance().getProxy("bungeecord").getOnlinePlayerCount());
 		scoret.setScore(Integer.valueOf(6).intValue());
 
 		Score scorep3 = objective.getScore("§4 ");

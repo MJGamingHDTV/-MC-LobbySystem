@@ -69,9 +69,9 @@ public class AsyncMySQL {
 		private int port;
 
 		private Connection conn;
-		
+
 		public MySQL() {
-			
+
 		}
 
 		public MySQL(String host, int port, String user, String password, String database) throws Exception {
@@ -141,10 +141,10 @@ public class AsyncMySQL {
 			}
 		}
 
-		public Connection openConnection() throws Exception {
-			Class.forName("com.mysql.jdbc.Driver");
-			return this.conn = DriverManager.getConnection(
-					"jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, this.user, this.password);
+		public void openConnection() throws Exception {
+			this.conn = DriverManager.getConnection(
+					"jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?autoReconnect=true",
+					this.user, this.password);
 		}
 
 		public void closeConnection() {
