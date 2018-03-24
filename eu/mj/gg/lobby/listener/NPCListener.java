@@ -27,10 +27,10 @@ public class NPCListener implements Listener {
 			Villager v = (Villager) e.getRightClicked();
 			UUID villager = v.getUniqueId();
 			String server = ServerNPC.cfg.getString("Villagers." + villager + ".Server");
-			if (server == "Survival") {
+			if (server.equalsIgnoreCase("Survival")) {
 				if (getPVersion(p) == true) {
 					String state = TimoCloudAPI.getUniversalInstance().getServer(server).getState();
-					if (state == "OFFLINE") {
+					if (state.equalsIgnoreCase("OFFLINE")) {
 						p.sendMessage(Main.pr + "§cDer Server ist derzeit offline!");
 					} else {
 						LobbyScore.sendTabTitle(p, null, null);
@@ -42,7 +42,7 @@ public class NPCListener implements Listener {
 				}
 			} else {
 				String state = TimoCloudAPI.getUniversalInstance().getServer(server).getState();
-				if (state == "OFFLINE") {
+				if (state.equalsIgnoreCase("OFFLINE")) {
 					p.sendMessage(Main.pr + "§cDer Server ist derzeit offline!");
 				} else {
 					LobbyScore.sendTabTitle(p, null, null);
@@ -62,10 +62,10 @@ public class NPCListener implements Listener {
 			Villager v = (Villager) e.getEntity();
 			UUID villager = v.getUniqueId();
 			String server = ServerNPC.cfg.getString("Villagers." + villager + ".Server");
-			if (server == "Survival") {
+			if (server.equalsIgnoreCase("Survival")) {
 				if (getPVersion(p) == true) {
 					String state = TimoCloudAPI.getUniversalInstance().getServer(server).getState();
-					if (state == "OFFLINE") {
+					if (state.equalsIgnoreCase("OFFLINE")) {
 						p.sendMessage(Main.pr + "§cDer Server ist derzeit offline!");
 					} else {
 						LobbyScore.sendTabTitle(p, null, null);
@@ -77,7 +77,7 @@ public class NPCListener implements Listener {
 				}
 			} else {
 				String state = TimoCloudAPI.getUniversalInstance().getServer(server).getState();
-				if (state == "OFFLINE") {
+				if (state.equalsIgnoreCase("OFFLINE")) {
 					p.sendMessage(Main.pr + "§cDer Server ist derzeit offline!");
 				} else {
 					LobbyScore.sendTabTitle(p, null, null);

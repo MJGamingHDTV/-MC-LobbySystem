@@ -2,8 +2,11 @@ package eu.mj.gg.lobby.functions;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -42,7 +45,7 @@ import eu.mj.gg.lobby.listener.BungeeCord;
 import eu.mj.gg.lobby.main.Main;
 import eu.mj.gg.lobby.methods.BungeeUtil;
 import eu.mj.gg.lobby.methods.LobbyScore;
-import eu.mj.gg.lobby.mysql.PlayerData;
+import eu.mj.gg.lobby.mysql.LobbyAPI;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
@@ -59,14 +62,16 @@ public class Settings implements Listener {
 	@SuppressWarnings("unchecked")
 	public static ArrayList<String> speed5list = (ArrayList<String>) cfg.get("Speed5");
 	public static ArrayList<String> Speed5 = new ArrayList<>();
-
 	@SuppressWarnings("unchecked")
 	public static ArrayList<String> speed10list = (ArrayList<String>) cfg.get("Speed10");
 	public static ArrayList<String> Speed10 = new ArrayList<>();
-
 	private static ArrayList<String> Speed1 = new ArrayList<>();
 
-	private static ArrayList<String> SilentLobby = new ArrayList<>();
+	public static ArrayList<String> SilentLobby = new ArrayList<>();
+	
+	public static ArrayList<String> Ride = new ArrayList<>();
+	
+	public static HashMap<Player, String> Color = new HashMap<Player, String>();
 
 	private Inventory inv1 = Bukkit.createInventory(null, 54, "§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
 	private Inventory inv2 = Bukkit.createInventory(null, 54, "§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
@@ -79,7 +84,21 @@ public class Settings implements Listener {
 		BungeeCord.getServerInfo("127.0.0.1", 25565);
 		e.setJoinMessage("");
 		Player p = e.getPlayer();
-		new PlayerData().getAsyncMySQL();
+		try {
+			LobbyAPI.createPlayer(p.getUniqueId().toString());
+		} catch (SQLException e1) {
+			
+		}
+		LobbyAPI.getWjump(p.getUniqueId().toString());
+		LobbyAPI.getColor(p.getUniqueId().toString());
+		LobbyAPI.getPjump(p.getUniqueId().toString());
+		LobbyAPI.getRide(p.getUniqueId().toString());
+		LobbyAPI.getSilent(p.getUniqueId().toString());
+		try {
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
 		PermissionUser user = PermissionsEx.getUser(p);
 		String prefix1 = user.getPrefix("world");
 		String prefix = prefix1.replace("&", "§");
@@ -101,25 +120,16 @@ public class Settings implements Listener {
 			p.setAllowFlight(true);
 			p.setFlying(false);
 		}
-
-		if (cfg.getBoolean("wjump." + p.getName()) == true) {
-			Settings.waterjump.add(p.getName());
-		}
-
-		if (cfg.getBoolean("pjump." + p.getName()) == true) {
-			Settings.platejump.add(p.getName());
-		}
-
-		if (cfg.getBoolean("silent." + p.getName()) == true) {
-			Settings.SilentLobby.add(p.getName());
-		}
-
+		
 		if (p.getFirstPlayed() == 0) {
 			Settings.waterjump.add(p.getName());
 			Settings.platejump.add(p.getName());
 		}
 		if (BuildCMD.allow.contains(p)) {
 			BuildCMD.allow.remove(p);
+		}
+		if (!Color.containsKey(p)) {
+			Color.put(p, "f");
 		}
 		p.setHealthScale(20);
 		p.setHealth(20);
@@ -129,8 +139,7 @@ public class Settings implements Listener {
 				"§eDu befindest dich auf:\n §6" + servername);
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			try {
-				Integer i = new PlayerData(all).getColor();
-				String c = i.toString();
+				String c = Settings.Color.get(all);
 				LobbyScore.setSidebar(all, c);
 			} catch (NullPointerException ex) {
 				LobbyScore.setSidebar(all, "0");
@@ -235,7 +244,7 @@ public class Settings implements Listener {
 					}
 				} else if (e.getMaterial() == Material.ENDER_CHEST) {
 					p.playSound(p.getLocation(), Sound.NOTE_PIANO, 1, 1);
-					p.performCommand("gadgetsmenu main");
+					p.performCommand("uc menu main");
 				} else if (e.getMaterial() == Material.SKULL_ITEM) {
 					p.playSound(p.getLocation(), Sound.NOTE_PIANO, 1, 1);
 					p.performCommand("friendsgui");
@@ -397,6 +406,9 @@ public class Settings implements Listener {
 					this.ConfItems(p, 1, 17, (short) 15, "§0Schwarz", Material.STAINED_GLASS, invfarbe);
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§fWeiß") {
 					cfg.set(p.getName(), 0);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "f");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "f");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -408,6 +420,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "f");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§6Orange") {
 					cfg.set(p.getName(), 1);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "6");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "6");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -419,6 +434,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "6");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§dMagenta") {
 					cfg.set(p.getName(), 2);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "d");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "d");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -430,6 +448,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "d");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§bHellblau") {
 					cfg.set(p.getName(), 3);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "b");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "b");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -441,6 +462,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "b");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§eGelb") {
 					cfg.set(p.getName(), 4);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "e");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "e");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -452,6 +476,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "e");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§aHellgrün") {
 					cfg.set(p.getName(), 5);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "a");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "a");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -463,6 +490,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "a");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§dPink") {
 					cfg.set(p.getName(), 6);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "d");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "d");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -474,6 +504,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "d");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§8Grau") {
 					cfg.set(p.getName(), 7);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "8");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "8");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -485,6 +518,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "8");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§7Hellgrau") {
 					cfg.set(p.getName(), 8);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "7");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "7");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -496,6 +532,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "7");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§3Aquablau") {
 					cfg.set(p.getName(), 9);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "3");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "3");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -507,6 +546,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "3");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§5Lila") {
 					cfg.set(p.getName(), 10);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "5");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "5");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -518,6 +560,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "5");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§1Blau") {
 					cfg.set(p.getName(), 11);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "1");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "1");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -529,6 +574,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "1");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "Braun") {
 					cfg.set(p.getName(), 12);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "c");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "c");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -540,6 +588,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "c");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§2Grün") {
 					cfg.set(p.getName(), 13);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "2");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "2");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -551,6 +602,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "2");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§4Rot") {
 					cfg.set(p.getName(), 14);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "4");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "4");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {
@@ -562,6 +616,9 @@ public class Settings implements Listener {
 					LobbyScore.setSidebar(p, "4");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§0Schwarz") {
 					cfg.set(p.getName(), 15);
+					Settings.Color.remove(p);
+					Settings.Color.put(p, "0");
+					LobbyAPI.setColor(p.getUniqueId().toString(), "0");
 					try {
 						cfg.save(f);
 					} catch (IOException e1) {

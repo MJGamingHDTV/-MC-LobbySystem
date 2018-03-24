@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -27,7 +26,11 @@ public class AsyncMySQL {
 			e.printStackTrace();
 		}
 	}
-
+	
+	public AsyncMySQL(Plugin pl) {
+		plugin = pl;
+	}
+	
 	public void update(PreparedStatement statement) {
 		executor.execute(() -> sql.queryUpdate(statement));
 	}
@@ -155,21 +158,6 @@ public class AsyncMySQL {
 			} finally {
 				this.conn = null;
 			}
-		}
-
-		public ResultSet getResult(String statement) {
-			ResultSet result = null;
-			checkConnection();
-			Statement s;
-			try {
-				s = conn.createStatement();
-				result = s.executeQuery(statement);
-				result.close();
-				s.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			return result;
 		}
 	}
 }

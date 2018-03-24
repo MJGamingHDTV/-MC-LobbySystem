@@ -8,10 +8,14 @@ import com.google.common.io.ByteStreams;
 import eu.mj.gg.lobby.main.Main;
 
 public class BungeeUtil {
-    public static void sendPlayerToServer(Player p, String server) {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("Connect");
-        out.writeUTF(server);
-        p.sendPluginMessage(Main.plugin, "BungeeCord", out.toByteArray());
-    }
+	public static void sendPlayerToServer(Player p, String server) {
+		try {
+			ByteArrayDataOutput out = ByteStreams.newDataOutput();
+			out.writeUTF("Connect");
+			out.writeUTF(server);
+			p.sendPluginMessage(Main.plugin, "BungeeCord", out.toByteArray());
+		} catch (NullPointerException ex) {
+			System.out.println(ex);
+		}
+	}
 }

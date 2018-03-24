@@ -11,20 +11,19 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+
+import eu.mj.gg.lobby.functions.Settings;
 import eu.mj.gg.lobby.main.Main;
 import eu.mj.gg.lobby.methods.LobbyScore;
-import eu.mj.gg.lobby.mysql.PlayerData;
 
 public class MainListener implements Listener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		new PlayerData().saveInAsyncMySQL();
 		e.setQuitMessage(null);
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			try {
-				Integer i = new PlayerData(all).getColor();
-				String c = i.toString();
+				String c = Settings.Color.get(all);
 				LobbyScore.setSidebar(all, c);
 			} catch (NullPointerException ex) {
 				LobbyScore.setSidebar(all, "0");
@@ -63,8 +62,7 @@ public class MainListener implements Listener {
 		e.setLeaveMessage(null);
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			try {
-				Integer i = new PlayerData(all).getColor();
-				String c = i.toString();
+				String c = Settings.Color.get(all);
 				LobbyScore.setSidebar(all, c);
 			} catch (NullPointerException ex) {
 				LobbyScore.setSidebar(all, "0");
