@@ -15,8 +15,7 @@ public class LobbyAPI {
 	static MySQL msql = new AsyncMySQL.MySQL();
 
 	public static void createPlayer(String uuid) throws SQLException {
-		AsyncMySQL.update("INSERT INTO LobbyConf (UUID, COLOR, WJUMP, PJUMP, SILENT, RIDE) VALUES ('" + uuid
-				+ "', '0', '0', '0', '0', '0');");
+		AsyncMySQL.update("INSERT INTO LobbyConf (UUID, COLOR, WJUMP, PJUMP, SILENT, RIDE, ITEMCOL) SELECT '" + uuid + "', '0', '0', '0', '0', '0', 'f' FROM DUAL WHERE NOT EXISTS (SELECT '*' FROM LobbyConf WHERE UUID = '" + uuid + "');");
 	}
 
 	public static void getColor(String uuid) {
@@ -32,8 +31,22 @@ public class LobbyAPI {
 			}
 		});
 	}
+	
+	public static void getItemCol(String uuid) {
+		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
+		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
+			try {
+				if (rs.next()) {
+					Integer c = Integer.valueOf(rs.getInt("ITEMCOL"));
+					Settings.ItemCol.put(p, c);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		});
+	}
 
-	public static void getPjump(String uuid){
+	public static void getPjump(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
@@ -112,6 +125,10 @@ public class LobbyAPI {
 
 	public static void setColor(String uuid, String string) {
 		AsyncMySQL.update("UPDATE LobbyConf SET COLOR='" + string + "' WHERE UUID='" + uuid + "'");
+	}
+	
+	public static void setItemCol(String uuid, Integer itemcol) {
+		AsyncMySQL.update("UPDATE LobbyConf SET ITEMCOL='" + itemcol + "' WHERE UUID='" + uuid + "'");
 	}
 
 	public static void setPjump(String uuid, boolean b) throws SQLException {

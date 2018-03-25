@@ -71,8 +71,7 @@ public class Compass implements Listener {
 						am51.setDisplayName("§6Spawn");
 						a51.setItemMeta(am51);
 
-						ItemStack glass = new ItemStack(Material.STAINED_GLASS_PANE, 1,
-								(short) Settings.cfg.getInt(p.getName()));
+						ItemStack glass = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) Settings.ItemCol.get(p).shortValue());
 						ItemMeta glasss = glass.getItemMeta();
 						glasss.setDisplayName("§a\u25B8 §9§lNAVIGATOR §a\u25C2");
 						glass.setItemMeta(glasss);

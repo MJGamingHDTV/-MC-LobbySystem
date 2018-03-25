@@ -15,7 +15,7 @@ public class RideonMe implements Listener {
 		try {
 			Player p = (Player) e.getRightClicked();
 			Player c = e.getPlayer();
-			if (Settings.cfg.getBoolean("ride." + p) == true) {
+			if (Settings.Ride.contains(p.getName())) {
 				p.setPassenger(c);
 			} else {
 				c.sendMessage(Main.pr + "§cDieser Spieler hat das RideonMe Feature nicht aktiv!");

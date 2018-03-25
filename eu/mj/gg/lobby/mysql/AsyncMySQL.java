@@ -33,10 +33,16 @@ public class AsyncMySQL {
 	
 	public void update(PreparedStatement statement) {
 		executor.execute(() -> sql.queryUpdate(statement));
+		try {
+			statement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void update(String statement) {
 		executor.execute(() -> sql.queryUpdate(statement));
+		
 	}
 
 	public void query(PreparedStatement statement, Consumer<ResultSet> consumer) {
@@ -105,7 +111,7 @@ public class AsyncMySQL {
 			} finally {
 				try {
 					statement.close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}

@@ -1,13 +1,9 @@
 package eu.mj.gg.lobby.functions;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -15,10 +11,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,28 +46,24 @@ import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class Settings implements Listener {
-	static File f = new File("plugins/GGLobby", "confmenue.yml");
-	public static YamlConfiguration cfg = YamlConfiguration.loadConfiguration(f);
 
 	private int jump = 1;
 
-	public static ArrayList<String> waterjump = new ArrayList<>();
+	public static ArrayList<String> waterjump = new ArrayList<String>();
 
-	public static ArrayList<String> platejump = new ArrayList<>();
+	public static ArrayList<String> platejump = new ArrayList<String>();
 
-	@SuppressWarnings("unchecked")
-	public static ArrayList<String> speed5list = (ArrayList<String>) cfg.get("Speed5");
-	public static ArrayList<String> Speed5 = new ArrayList<>();
-	@SuppressWarnings("unchecked")
-	public static ArrayList<String> speed10list = (ArrayList<String>) cfg.get("Speed10");
-	public static ArrayList<String> Speed10 = new ArrayList<>();
-	private static ArrayList<String> Speed1 = new ArrayList<>();
+	public static ArrayList<String> Speed5 = new ArrayList<String>();
+	public static ArrayList<String> Speed10 = new ArrayList<String>();
+	private static ArrayList<String> Speed1 = new ArrayList<String>();
 
-	public static ArrayList<String> SilentLobby = new ArrayList<>();
+	public static ArrayList<String> SilentLobby = new ArrayList<String>();
 	
-	public static ArrayList<String> Ride = new ArrayList<>();
+	public static ArrayList<String> Ride = new ArrayList<String>();
 	
 	public static HashMap<Player, String> Color = new HashMap<Player, String>();
+	
+	public static HashMap<Player, Integer> ItemCol = new HashMap<Player, Integer>();
 
 	private Inventory inv1 = Bukkit.createInventory(null, 54, "§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
 	private Inventory inv2 = Bukkit.createInventory(null, 54, "§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
@@ -79,23 +71,26 @@ public class Settings implements Listener {
 	private Inventory invfarbe = Bukkit.createInventory(null, 18, "§a\u25B8 §9§lInventarfarbe §a\u25C2");
 	private Inventory inv = Bukkit.createInventory(null, 9, "§a\u25B8 §9§lLOBBYWECHSLER §a\u25C2");
 
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onJoin(PlayerJoinEvent e) {
 		BungeeCord.getServerInfo("127.0.0.1", 25565);
 		e.setJoinMessage("");
 		Player p = e.getPlayer();
+		String pexprefix = PermissionsEx.getUser(p).getPrefix();
+		p.setDisplayName(pexprefix + p.getName());
 		try {
 			LobbyAPI.createPlayer(p.getUniqueId().toString());
 		} catch (SQLException e1) {
-			
+			System.out.println(e1);
 		}
 		LobbyAPI.getWjump(p.getUniqueId().toString());
 		LobbyAPI.getColor(p.getUniqueId().toString());
 		LobbyAPI.getPjump(p.getUniqueId().toString());
 		LobbyAPI.getRide(p.getUniqueId().toString());
 		LobbyAPI.getSilent(p.getUniqueId().toString());
+		LobbyAPI.getItemCol(p.getUniqueId().toString());
 		try {
-			TimeUnit.SECONDS.sleep(1);
+			Thread.sleep(2000);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
@@ -130,6 +125,9 @@ public class Settings implements Listener {
 		}
 		if (!Color.containsKey(p)) {
 			Color.put(p, "f");
+		}
+		if (!ItemCol.containsKey(p)) {
+			ItemCol.put(p, 0);
 		}
 		p.setHealthScale(20);
 		p.setHealth(20);
@@ -296,48 +294,44 @@ public class Settings implements Listener {
 				if (e.getCurrentItem().getItemMeta().getDisplayName() == "§9§lJump on Liquid") {
 					if (Settings.waterjump.contains(p.getName())) {
 						Settings.waterjump.remove(p.getName());
-						cfg.set("wjump." + p.getName(), false);
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						try {
-							cfg.save(f);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+							LobbyAPI.setWjump(p.getUniqueId().toString(), false);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
 						}
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						this.deaktiv(17, inv1);
 						p.updateInventory();
 					} else {
 						Settings.waterjump.add(p.getName());
-						cfg.set("wjump." + p.getName(), true);
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						try {
-							cfg.save(f);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+							LobbyAPI.setWjump(p.getUniqueId().toString(), true);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
 						}
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						this.aktiv(17, inv1);
 						p.updateInventory();
 					}
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§9§lJump on Plate") {
 					if (Settings.platejump.contains(p.getName())) {
 						Settings.platejump.remove(p.getName());
-						cfg.set("pjump." + p.getName(), false);
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						try {
-							cfg.save(f);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+							LobbyAPI.setPjump(p.getUniqueId().toString(), false);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
 						}
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						this.deaktiv(26, inv1);
 						p.updateInventory();
 					} else {
 						Settings.platejump.add(p.getName());
-						cfg.set("pjump." + p.getName(), true);
-						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						try {
-							cfg.save(f);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+							LobbyAPI.setPjump(p.getUniqueId().toString(), true);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
 						}
+						p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1, 1);
 						this.aktiv(26, inv1);
 						p.updateInventory();
 					}
@@ -405,225 +399,161 @@ public class Settings implements Listener {
 					this.ConfItems(p, 1, 16, (short) 14, "§4Rot", Material.STAINED_GLASS, invfarbe);
 					this.ConfItems(p, 1, 17, (short) 15, "§0Schwarz", Material.STAINED_GLASS, invfarbe);
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§fWeiß") {
-					cfg.set(p.getName(), 0);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "f");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 0);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "f");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "f");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§6Orange") {
-					cfg.set(p.getName(), 1);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "6");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 1);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "6");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "6");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§dMagenta") {
-					cfg.set(p.getName(), 2);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "d");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 2);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "d");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "d");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§bHellblau") {
-					cfg.set(p.getName(), 3);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "b");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 3);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "b");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "b");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§eGelb") {
-					cfg.set(p.getName(), 4);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "e");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 4);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "e");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "e");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§aHellgrün") {
-					cfg.set(p.getName(), 5);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "a");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 5);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "a");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "a");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§dPink") {
-					cfg.set(p.getName(), 6);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "d");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 6);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "d");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "d");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§8Grau") {
-					cfg.set(p.getName(), 7);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "8");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 7);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "8");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "8");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§7Hellgrau") {
-					cfg.set(p.getName(), 8);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "7");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 8);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "7");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "7");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§3Aquablau") {
-					cfg.set(p.getName(), 9);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "3");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 9);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "3");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "3");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§5Lila") {
-					cfg.set(p.getName(), 10);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "5");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 10);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "5");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "5");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§1Blau") {
-					cfg.set(p.getName(), 11);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "1");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 11);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "1");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "1");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "Braun") {
-					cfg.set(p.getName(), 12);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "c");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 12);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "c");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "c");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§2Grün") {
-					cfg.set(p.getName(), 13);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "2");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 13);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "2");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "2");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§4Rot") {
-					cfg.set(p.getName(), 14);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "4");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 14);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "4");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
 					LobbyScore.setSidebar(p, "4");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§0Schwarz") {
-					cfg.set(p.getName(), 15);
 					Settings.Color.remove(p);
 					Settings.Color.put(p, "0");
+					Settings.ItemCol.remove(p);
+					Settings.ItemCol.put(p, 15);
 					LobbyAPI.setColor(p.getUniqueId().toString(), "0");
-					try {
-						cfg.save(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					this.Invent1(p);
 					this.Invent2(p);
 					p.openInventory(inv2);
@@ -641,11 +571,10 @@ public class Settings implements Listener {
 					ae.start();
 					if (SilentLobby.contains(p.getName())) {
 						SilentLobby.remove(p.getName());
-						cfg.set("silent." + p.getName(), false);
 						try {
-							cfg.save(f);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+							LobbyAPI.setSilent(p.getUniqueId().toString(), false);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
 						}
 						for (Player all : Bukkit.getOnlinePlayers()) {
 							p.showPlayer(all);
@@ -657,11 +586,10 @@ public class Settings implements Listener {
 					} else {
 						if (p.hasPermission("gg.silentlobby")) {
 							SilentLobby.add(p.getName());
-							cfg.set("silent." + p.getName(), true);
 							try {
-								cfg.save(f);
-							} catch (IOException e1) {
-								e1.printStackTrace();
+								LobbyAPI.setSilent(p.getUniqueId().toString(), true);
+							} catch (SQLException e2) {
+								e2.printStackTrace();
 							}
 							for (Player all : Bukkit.getOnlinePlayers()) {
 								p.hidePlayer(all);
@@ -679,12 +607,20 @@ public class Settings implements Listener {
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§9§lSpieler Verstecken") {
 					p.performCommand("hide");
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName() == "§9§lLet player ride on you") {
-					if (cfg.getBoolean("ride." + p) == true) {
-						cfg.set("ride." + p, false);
+					if (Settings.Ride.contains(p.getName())) {
+						try {
+							LobbyAPI.setRide(p.getUniqueId().toString(), false);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
+						}
 						this.deaktiv(17, inv3);
 						p.updateInventory();
 					} else {
-						cfg.set("ride." + p, true);
+						try {
+							LobbyAPI.setRide(p.getUniqueId().toString(), true);
+						} catch (SQLException e2) {
+							e2.printStackTrace();
+						}
 						this.aktiv(17, inv3);
 						p.updateInventory();
 					}
@@ -839,7 +775,7 @@ public class Settings implements Listener {
 		while (i >= 0) {
 			ItemStack GlasPane = new ItemStack(Material.STAINED_GLASS_PANE);
 			ItemMeta gpm = GlasPane.getItemMeta();
-			int color = cfg.getInt(p.getName());
+			int color =  Settings.ItemCol.get(p);
 			GlasPane.setDurability((short) color);
 			gpm.setDisplayName("§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
 			GlasPane.setItemMeta(gpm);
@@ -847,7 +783,7 @@ public class Settings implements Listener {
 			--i;
 		}
 
-		int color = cfg.getInt(p.getName());
+		int color = Settings.ItemCol.get(p);
 
 		ItemStack GlasPane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) color);
 		ItemMeta gpm = GlasPane.getItemMeta();
@@ -882,7 +818,7 @@ public class Settings implements Listener {
 		ride.setItemMeta(ridemeta);
 		inv3.setItem(9, ride);
 
-		if (cfg.getBoolean("ride." + p) == true) {
+		if (Settings.Ride.contains(p.getName())) {
 			this.aktiv(17, inv3);
 		} else {
 			this.deaktiv(17, inv3);
@@ -891,13 +827,13 @@ public class Settings implements Listener {
 	}
 
 	private void Invent2(Player p) {
-		int color = cfg.getInt(p.getName());
+		int color = Settings.ItemCol.get(p);
 
 		int v = 8;
 		while (v >= 0) {
 			ItemStack GlasPane = new ItemStack(Material.STAINED_GLASS_PANE);
 			ItemMeta gpm = GlasPane.getItemMeta();
-			color = cfg.getInt(p.getName());
+			color = Settings.ItemCol.get(p);
 			GlasPane.setDurability((short) color);
 			gpm.setDisplayName("§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
 			GlasPane.setItemMeta(gpm);
@@ -976,7 +912,7 @@ public class Settings implements Listener {
 		this.ConfItems(p, 1, 27, (short) 8226, "§9§lLobby-Speed", Material.POTION, inv1);
 		this.ConfItems(p, 1, 49, (short) 0, "§9Seite §a§l1§6§l|§a§l3", Material.PAPER, inv1);
 		while (i >= 0) {
-			int color = cfg.getInt(p.getName());
+			int color = Settings.ItemCol.get(p);
 			ItemStack GlasPane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) color);
 			ItemMeta gpm = GlasPane.getItemMeta();
 			gpm.setDisplayName("§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
@@ -1002,7 +938,7 @@ public class Settings implements Listener {
 		} else {
 			this.yellow(35, 1);
 		}
-		int color = cfg.getInt(p.getName());
+		int color = Settings.ItemCol.get(p);
 		ItemStack GlasPane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) color);
 		ItemMeta gpm = GlasPane.getItemMeta();
 		gpm.setDisplayName("§a\u25B8 §9§lKONFIGURATIONSMENÜ §a\u25C2");
