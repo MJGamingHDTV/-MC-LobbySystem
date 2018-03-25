@@ -17,13 +17,15 @@ import eu.mj.gg.lobby.main.Main;
 import eu.mj.gg.lobby.methods.LobbyScore;
 
 public class MainListener implements Listener {
+	
+	Settings settings = new Settings();
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
 		e.setQuitMessage(null);
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			try {
-				String c = Settings.Color.get(all);
+				String c = settings.Color.get(all);
 				LobbyScore.setSidebar(all, c);
 			} catch (NullPointerException ex) {
 				LobbyScore.setSidebar(all, "0");
@@ -62,7 +64,7 @@ public class MainListener implements Listener {
 		e.setLeaveMessage(null);
 		for (Player all : Bukkit.getOnlinePlayers()) {
 			try {
-				String c = Settings.Color.get(all);
+				String c = settings.Color.get(all);
 				LobbyScore.setSidebar(all, c);
 			} catch (NullPointerException ex) {
 				LobbyScore.setSidebar(all, "0");

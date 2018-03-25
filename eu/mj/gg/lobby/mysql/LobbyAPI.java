@@ -13,18 +13,24 @@ import eu.mj.gg.lobby.mysql.AsyncMySQL.MySQL;
 public class LobbyAPI {
 	static AsyncMySQL amsql = new AsyncMySQL(Main.plugin);
 	static MySQL msql = new AsyncMySQL.MySQL();
+	Settings settings = new Settings();
+	
+	public LobbyAPI() {
+		
+	}
 
-	public static void createPlayer(String uuid) throws SQLException {
+	public void createPlayer(String uuid) throws SQLException {
 		AsyncMySQL.update("INSERT INTO LobbyConf (UUID, COLOR, WJUMP, PJUMP, SILENT, RIDE, ITEMCOL) SELECT '" + uuid + "', '0', '0', '0', '0', '0', 'f' FROM DUAL WHERE NOT EXISTS (SELECT '*' FROM LobbyConf WHERE UUID = '" + uuid + "');");
 	}
 
-	public static void getColor(String uuid) {
+	public void getColor(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
 				if (rs.next()) {
 					String c = String.valueOf(rs.getInt("COLOR"));
-					Settings.Color.put(p, c);
+					System.out.println("Color" + c);
+					settings.Color.put(p, c);
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -32,13 +38,14 @@ public class LobbyAPI {
 		});
 	}
 	
-	public static void getItemCol(String uuid) {
+	public void getItemCol(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
 				if (rs.next()) {
 					Integer c = Integer.valueOf(rs.getInt("ITEMCOL"));
-					Settings.ItemCol.put(p, c);
+					System.out.println("ITEMCOL" + c); 
+					settings.ItemCol.put(p, c);
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -46,7 +53,7 @@ public class LobbyAPI {
 		});
 	}
 
-	public static void getPjump(String uuid) {
+	public void getPjump(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
@@ -55,10 +62,11 @@ public class LobbyAPI {
 				}
 				int b = 0;
 				b = rs.getInt("PJUMP");
+				System.out.println("S" + b);
 				if (b == 1) {
-					Settings.platejump.add(p.getName());
+					settings.platejump.add(p.getName());
 				} else {
-					Settings.platejump.remove(p.getName());
+					settings.platejump.remove(p.getName());
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -66,7 +74,7 @@ public class LobbyAPI {
 		});
 	}
 
-	public static void getSilent(String uuid) {
+	public void getSilent(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
@@ -74,10 +82,11 @@ public class LobbyAPI {
 					Integer.valueOf(rs.getInt("SILENT"));
 				}
 				int b = rs.getInt("SILENT");
+				System.out.println("S" + b);
 				if (b == 1) {
-					Settings.SilentLobby.add(p.getName());
+					settings.SilentLobby.add(p.getName());
 				} else {
-					Settings.SilentLobby.remove(p.getName());
+					settings.SilentLobby.remove(p.getName());
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -85,7 +94,7 @@ public class LobbyAPI {
 		});
 	}
 
-	public static void getWjump(String uuid) {
+	public void getWjump(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
@@ -93,10 +102,11 @@ public class LobbyAPI {
 					Integer.valueOf(rs.getInt("WJUMP"));
 				}
 				int b = rs.getInt("WJUMP");
+				System.out.println("W" + b);
 				if (b == 1) {
-					Settings.waterjump.add(p.getName());
+					settings.waterjump.add(p.getName());
 				} else {
-					Settings.waterjump.remove(p.getName());
+					settings.waterjump.remove(p.getName());
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -104,7 +114,7 @@ public class LobbyAPI {
 		});
 	}
 
-	public static void getRide(String uuid) {
+	public void getRide(String uuid) {
 		Player p = Bukkit.getPlayer(UUID.fromString(uuid));
 		amsql.query("SELECT * FROM LobbyConf WHERE UUID='" + uuid + "'", rs -> {
 			try {
@@ -112,10 +122,11 @@ public class LobbyAPI {
 					Integer.valueOf(rs.getInt("RIDE"));
 				}
 				int b = rs.getInt("RIDE");
+				System.out.println("R" + b);
 				if (b == 1) {
-					Settings.Ride.add(p.getName());
+					settings.Ride.add(p.getName());
 				} else {
-					Settings.Ride.remove(p.getName());
+					settings.Ride.remove(p.getName());
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
